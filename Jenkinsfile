@@ -1,12 +1,29 @@
 pipeline{
-    agent {docker true}
+    environment {
+        imageName = "vladyslavobochuk/test"
+        registryCredential = 'docker'
+        gitUrl= 'https://github.com/Obochuk/jenkins'
+        gitCredential = 'for_git'
+    }
+    parameters {
+            string(name: 'branch', defaultValue:'develop', description:"Put the branch for build")
+    }
+
     stages{
-        stage("Build"){
-            steps{
-                docker image build -t jenkins-demo:${BUILD_NUMBER} .
-                docker tag jenkins-demo:${BUILD_NUMBER} jenkins-demo:latest
-                docker tag jenkins-demo:latest vladyslavobochuk/test:jenkins-demo
-                docker push vladyslavobochuk/test:jenkins-demo
+        stage("Clone Git") {
+            git([url: ${gitUrl}, branch: ${params.branch}, credentialsId: ${gitCredential}])
+        }
+        stage("Build") {
+            script {
+                dockerImage = docker.build imageName
+            }
+        }
+        stage("Deploy image") {
+            script {
+                docker.withRegistry( '', registryCredential ) {
+                    dockerImage.push("$BUILD_NUMBER")
+                    dockerImage.push('latest')
+                }
             }
         }
     }
