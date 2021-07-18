@@ -9,10 +9,12 @@ pipeline{
             string(name: 'branch', defaultValue:'develop', description:"Put the branch for build")
     }
 
+    agent any
+
     stages{
         stage("Clone Git") {
             steps {
-                git([url: ${gitUrl}, branch: ${params.branch}, credentialsId: ${gitCredential}])
+                git([url: "${gitUrl}", branch: "${params.branch}", credentialsId: "${gitCredential}"])
             }
         }
         stage("Build") {
