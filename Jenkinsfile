@@ -11,18 +11,24 @@ pipeline{
 
     stages{
         stage("Clone Git") {
-            git([url: ${gitUrl}, branch: ${params.branch}, credentialsId: ${gitCredential}])
+            steps {
+                git([url: ${gitUrl}, branch: ${params.branch}, credentialsId: ${gitCredential}])
+            }
         }
         stage("Build") {
-            script {
-                dockerImage = docker.build imageName
+            steps {
+                script {
+                    dockerImage = docker.build imageName
+                }
             }
         }
         stage("Deploy image") {
-            script {
-                docker.withRegistry( '', registryCredential ) {
-                    dockerImage.push("$BUILD_NUMBER")
-                    dockerImage.push('latest')
+            steps {
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push("$BUILD_NUMBER")
+                        dockerImage.push('latest')
+                    }
                 }
             }
         }
