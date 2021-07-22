@@ -4,6 +4,8 @@ pipeline{
         registryCredential = 'docker'
         gitUrl= 'https://github.com/Obochuk/jenkins'
         gitCredential = 'for_git'
+        kubeConfigs = "service-deployment.yaml"
+        kubeCred = "kube"
     }
     parameters {
             string(name: 'branch', defaultValue:'develop', description:"Put the branch for build")
@@ -31,6 +33,14 @@ pipeline{
                         dockerImage.push("$BUILD_NUMBER")
                         dockerImage.push('latest')
                     }
+                }
+            }
+        }
+        stage("Publish") {
+            steps {
+                script {
+                    env.PRODUCT_SERVICE_TAG = "${env.BUILD_ID}"
+                    kubernetesDeploy(configs: "${kubeConfigs}", kubeconfigId:"${kubeCred}")
                 }
             }
         }
