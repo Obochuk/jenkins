@@ -20,7 +20,7 @@ pipeline{
         stage("Build") {
             steps {
                 script {
-                    dockerImage = docker.build imageName
+                    dockerImage = docker.build(imageName, "-v /root/.m2:/root/.m2")
                 }
             }
         }
